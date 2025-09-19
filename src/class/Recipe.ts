@@ -1,4 +1,4 @@
-import { Resource } from '@/class/Ressource.ts'
+import { Resource } from '@/class/Resource.ts'
 
 interface RecipeEntry {
   resource: Resource;
