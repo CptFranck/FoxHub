@@ -1,33 +1,46 @@
 <script setup lang="ts">
-  import { ref } from 'vue'
   import { Recipe } from '@/class/Recipe.ts'
   import { Resource } from '@/class/Resource.ts'
+  import { ref } from 'vue'
 
   defineOptions({
     name: 'RefineryComponent'
   });
 
+  const refiningOption = ref([
+    new Recipe([ {resource : new Resource("Salvage", 0), ratio: 2 }],
+      [{resource: new Resource("Basic Material", 0), ratio: 1 }]),
+    new Recipe([{ resource: new Resource("Salvage", 0), ratio: 5 }],
+      [{ resource: new Resource("Diesel", 0), ratio: 1 }])
+  ]);
 
-  const refiningOption : Array<Recipe> = [
-    new Recipe({ salvage: { resource: new Resource("Salvage", 0), ratio: 2 }},
-      { basicMaterial: { resource: new Resource("Basic Material", 0), ratio: 1 }}),
-    new Recipe({ salvage: { resource: new Resource("Salvage", 0), ratio: 5 }},
-      { diesel: { resource: new Resource("Diesel", 0), ratio: 1 }})
-  ];
-    // basicMaterial: {
-    //   inputs: { resource : salvage,  value: 0 },
-    //   outputs: [{ name: "Basic Material", type: "basicMaterial", value: 0 }],
-    //   // time: { h: 0, min: 0, sec: 0, ms: 48 },
-    //   personalOutputLimit: 12500,
-    //   publicStockpileLimit: 32000,
-    // },
-    // diesel: {
-    //   inputs: { salvage: 5 },
-    //   outputs: { gas: 1 },
-    //   time: { h: 0, min: 0, sec: 12, ms: 0 },
-    //   personalOutputLimit: 6000,
-    //   publicStockpileLimit: 32000,
-    // },
+  function updateOutputValue(recipe: Recipe) {
+    const cycle = recipe.computeMaxProdCycle();
+    recipe.outputs.forEach(output => (cycle * output.ratio % 1 === 0)
+      && (output.resource.quantity = cycle * output.ratio))
+  }
+
+  function updateInputValue(recipe: Recipe) {
+    const cycle = recipe.computeMinProdCycle();
+    recipe.inputs.forEach(input => (cycle * input.ratio % 1 === 0)
+      && (input.resource.quantity = cycle * input.ratio))
+  }
+
+
+  // basicMaterial: {
+  //   inputs: { resource : salvage,  value: 0 },
+  //   outputs: [{ name: "Basic Material", type: "basicMaterial", value: 0 }],
+  //   // time: { h: 0, min: 0, sec: 0, ms: 48 },
+  //   personalOutputLimit: 12500,
+  //   publicStockpileLimit: 32000,
+  // },
+  // diesel: {
+  //   inputs: { salvage: 5 },
+  //   outputs: { gas: 1 },
+  //   time: { h: 0, min: 0, sec: 12, ms: 0 },
+  //   personalOutputLimit: 6000,
+  //   publicStockpileLimit: 32000,
+  // },
   // };
   // const orderPrivacy = ref(false);
 
@@ -37,7 +50,7 @@
 <!--    {{ Object.values(refiningOption).map(ro => ro.inputs.resource).map(i => i.resource.name + ":" + i.resource.quantity).join(', ') }}-->
 <!--    {{ Object.values(refiningOption).map(ro => ro.outputs.resource).map(o => o.resource.name + ":" + o.resource.quantity).join(', ') }}-->
 <!--        {{ Object.values(refiningOption).map(ro => ro.inputs[0].resource).map(r => r.name ).join(', ') }}-->
-    {{  Object.values(refiningOption).map(ro => "r") }}
+    {{  Object.values(refiningOption).map(ro => "r").join(', ') }}
     <table>
       <thead>
       <tr>
@@ -49,11 +62,15 @@
       </tr>
       </thead>
       <tbody>
-      <tr v-for="recipe in refiningOption" >
+      <tr v-for="(recipe, kr) in refiningOption" :key="kr">
         <td>
-          <p v-for="input in recipe.inputs">
+          <p v-for="(input, ki) in recipe.inputs" :key="ki">
             {{input.resource.name}}
-            <input type="number" v-model.number="input.resource.quantity">
+            <input type="number"
+                   v-model.number="input.resource.quantity"
+                   @input="updateOutputValue(recipe)"
+                   min="0"
+            >
           </p>
         </td>
         <td>
@@ -62,9 +79,13 @@
           {{ Object.values(recipe.outputs).map(o => o.ratio + ' ' + o.resource.name).join(', ') }}
         </td>
         <td>
-          <p v-for="output in recipe.outputs">
+          <p v-for="(output, ko) in recipe.outputs" :key="ko">
             {{output.resource.name}}
-            <input type="number" v-model.number="output.resource.quantity">
+            <input type="number"
+                   v-model.number="output.resource.quantity"
+                   @input="updateInputValue(recipe)"
+                   min="0"
+            >
           </p>
         </td>
 <!--        <td>/{{ orderPrivacy ? recipe.personalOutputLimit : recipe.publicStockpileLimit }}</td>-->
