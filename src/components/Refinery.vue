@@ -14,17 +14,7 @@
       [{ resource: new Resource("Diesel", 0), ratio: 1 }])
   ]);
 
-  function updateOutputValue(recipe: Recipe) {
-    const cycle = recipe.computeMaxProdCycle();
-    recipe.outputs.forEach(output => (cycle * output.ratio % 1 === 0)
-      && (output.resource.quantity = cycle * output.ratio))
-  }
 
-  function updateInputValue(recipe: Recipe) {
-    const cycle = recipe.computeMinProdCycle();
-    recipe.inputs.forEach(input => (cycle * input.ratio % 1 === 0)
-      && (input.resource.quantity = cycle * input.ratio))
-  }
 
 
   // basicMaterial: {
@@ -68,7 +58,7 @@
             {{input.resource.name}}
             <input type="number"
                    v-model.number="input.resource.quantity"
-                   @input="updateOutputValue(recipe)"
+                   @input="recipe.updateOutputValue()"
                    min="0"
             >
           </p>
@@ -83,7 +73,7 @@
             {{output.resource.name}}
             <input type="number"
                    v-model.number="output.resource.quantity"
-                   @input="updateInputValue(recipe)"
+                   @input="recipe.updateInputValue()"
                    min="0"
             >
           </p>

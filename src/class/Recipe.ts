@@ -20,7 +20,19 @@ export class Recipe {
     this.outputs = outputs;
   }
 
-  computeMaxProdCycle() : number{
+  updateOutputValue() {
+    const cycle = this.computeMaxProdCycle();
+    this.outputs.forEach(output => (cycle * output.ratio % 1 === 0)
+      && (output.resource.quantity = cycle * output.ratio))
+  }
+
+  updateInputValue() {
+    const cycle = this.computeMinProdCycle();
+    this.inputs.forEach(input => (cycle * input.ratio % 1 === 0)
+      && (input.resource.quantity = cycle * input.ratio))
+  }
+
+  private computeMaxProdCycle() : number{
     let cycles = Infinity;
     for (const key in this.inputs) {
       const entry = this.inputs[key];
@@ -30,7 +42,7 @@ export class Recipe {
     return cycles;
   }
 
-  computeMinProdCycle() : number{
+  private computeMinProdCycle() : number{
     let minimumCycles = 0;
     for (const key in this.outputs) {
       const output = this.outputs[key];
