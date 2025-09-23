@@ -1,22 +1,23 @@
 <script setup lang="ts">
-  import { Recipe } from '@/class/Recipe.ts'
+import { formatDuration, Recipe } from '@/class/Recipe.ts'
   import { Resource } from '@/class/Resource.ts'
   import { ref } from 'vue'
+  import Duration from 'ts-time/Duration'
 
   defineOptions({
     name: 'RefineryComponent'
   });
 
+  const orderPrivacy = ref(false);
+
   const refiningOption = ref([
-    new Recipe([ {resource : new Resource("Salvage", 0), ratio: 2 }],
-      [{resource: new Resource("Basic Material", 0), ratio: 1 }]),
+    new Recipe([{resource : new Resource("Salvage", 0), ratio: 2 }],
+              [{resource: new Resource("Basic Material", 0), ratio: 1 }],
+              Duration.ofMs(480)),
     new Recipe([{ resource: new Resource("Salvage", 0), ratio: 5 }],
-      [{ resource: new Resource("Diesel", 0), ratio: 1 }])
+              [{ resource: new Resource("Diesel", 0), ratio: 1 }],
+              Duration.ofSeconds(12))
   ]);
-
-
-
-
   // basicMaterial: {
   //   inputs: { resource : salvage,  value: 0 },
   //   outputs: [{ name: "Basic Material", type: "basicMaterial", value: 0 }],
@@ -32,15 +33,10 @@
   //   publicStockpileLimit: 32000,
   // },
   // };
-  // const orderPrivacy = ref(false);
 
 </script>
 <template>
   <div>
-<!--    {{ Object.values(refiningOption).map(ro => ro.inputs.resource).map(i => i.resource.name + ":" + i.resource.quantity).join(', ') }}-->
-<!--    {{ Object.values(refiningOption).map(ro => ro.outputs.resource).map(o => o.resource.name + ":" + o.resource.quantity).join(', ') }}-->
-<!--        {{ Object.values(refiningOption).map(ro => ro.inputs[0].resource).map(r => r.name ).join(', ') }}-->
-    {{  Object.values(refiningOption).map(ro => "r").join(', ') }}
     <table>
       <thead>
       <tr>
@@ -48,38 +44,38 @@
         <th>Ratio</th>
         <th>Produced</th>
         <th>Output limit</th>
-        <th>Time</th>
+        <th>Process Time</th>
       </tr>
       </thead>
       <tbody>
       <tr v-for="(recipe, kr) in refiningOption" :key="kr">
         <td>
-          <p v-for="(input, ki) in recipe.inputs" :key="ki">
-            {{input.resource.name}}
+          <span v-for="(input, ki) in recipe.inputs" :key="ki" class="cell-item">
+            <span class="cell-label">{{ input.resource.name }}</span>
             <input type="number"
                    v-model.number="input.resource.quantity"
                    @input="recipe.updateOutputValue()"
                    min="0"
             >
-          </p>
+          </span>
         </td>
         <td>
-          {{ Object.values(recipe.inputs).map(i => i.ratio + ' ' + i.resource.name).join(', ') }}
+          {{ Object.values(recipe.inputs).map(i => i.ratio).join(' + ') }}
           →
-          {{ Object.values(recipe.outputs).map(o => o.ratio + ' ' + o.resource.name).join(', ') }}
+          {{ Object.values(recipe.outputs).map(o => o.ratio).join(' + ') }}
         </td>
         <td>
-          <p v-for="(output, ko) in recipe.outputs" :key="ko">
-            {{output.resource.name}}
+          <span v-for="(output, ko) in recipe.outputs" :key="ko" class="cell-item" >
+            <span class="cell-label">{{ output.resource.name }}</span>
             <input type="number"
                    v-model.number="output.resource.quantity"
                    @input="recipe.updateInputValue()"
                    min="0"
             >
-          </p>
+          </span>
         </td>
-<!--        <td>/{{ orderPrivacy ? recipe.personalOutputLimit : recipe.publicStockpileLimit }}</td>-->
-<!--        <td>{{ new Date(recipe.time)}}</td>-->
+        <td>/...</td>
+        <td>{{ formatDuration(recipe.processTime)}}</td>
       </tr>
       </tbody>
     </table>
@@ -87,14 +83,32 @@
 </template>
 
 <style scoped>
+
 table {
   margin-top: 1rem;
   width: 100%;
   border-collapse: collapse;
 }
 th, td {
-  text-align: center;
+  padding: 8px;
+  border: none;
+  vertical-align: middle; /* aligne le contenu au centre verticalement */
+  white-space: nowrap;
+  text-align: left;
 }
+
+.cell-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.cell-label {
+  flex: 1;
+  text-align: left;
+}
+
 </style>
 
 
