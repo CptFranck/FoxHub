@@ -1,4 +1,13 @@
 import { Resource } from '@/class/Resource.ts'
+import Duration from 'ts-time/Duration'
+
+function isInt(value : number): boolean {
+  return value % 1 === 0
+}
+
+function removeFloat(value : number): number {
+  return value - (value % 1)
+}
 
 export interface RecipeEntry {
   resource: Resource;
@@ -8,28 +17,36 @@ export interface RecipeEntry {
 export class Recipe {
   inputs: RecipeEntry[];
   outputs: RecipeEntry[];
-  // time : ;
+  time : Duration;
+  processTime : Duration;
   // personalOutputLimit: number;
-  // publicStockpileLimit: number;
+  // static publicStockpileLimit: number = 32000;
 
   constructor(
     inputs: RecipeEntry[],
-    outputs: RecipeEntry[]
+    outputs: RecipeEntry[],
+    time: Duration,
+    // personalOutputLimit: number
   ) {
     this.inputs = inputs;
     this.outputs = outputs;
+    this.time = time;
+    this.processTime = Duration.of(0);
+    this.updateOutputValue();
+    // this.personalOutputLimit = personalOutputLimit;
   }
 
   updateOutputValue() {
-    const cycle = this.computeMaxProdCycle();
-    this.outputs.forEach(output => (cycle * output.ratio % 1 === 0)
-      && (output.resource.quantity = cycle * output.ratio))
+    let cycle = this.computeMaxProdCycle();
+    if(!isInt(cycle)) cycle = removeFloat(cycle);
+    this.processTime = this.time.multiply(cycle);
+    this.outputs.forEach(output => output.resource.quantity = cycle * output.ratio);
   }
 
   updateInputValue() {
     const cycle = this.computeMinProdCycle();
-    this.inputs.forEach(input => (cycle * input.ratio % 1 === 0)
-      && (input.resource.quantity = cycle * input.ratio))
+    this.processTime = this.time.multiply(cycle);
+    this.inputs.forEach(input => input.resource.quantity = cycle * input.ratio)
   }
 
   private computeMaxProdCycle() : number{
@@ -39,16 +56,18 @@ export class Recipe {
       const possibleCycles = entry.resource.quantity / entry.ratio;
       if (possibleCycles < cycles) cycles = possibleCycles;
     }
+    if (cycles < 0) cycles = 0;
     return cycles;
   }
 
   private computeMinProdCycle() : number{
-    let minimumCycles = 0;
+    let minCycles = 0;
     for (const key in this.outputs) {
       const output = this.outputs[key];
       const possibleCycles = output.resource.quantity * output.ratio;
-      if (minimumCycles < possibleCycles ) minimumCycles = possibleCycles;
+      if (minCycles < possibleCycles ) minCycles = possibleCycles;
     }
-    return minimumCycles;
+    if (minCycles < 0) minCycles = 0;
+    return minCycles;
   }
 }
