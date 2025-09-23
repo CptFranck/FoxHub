@@ -1,5 +1,5 @@
 import { Resource } from '@/class/Resource.ts'
-import Duration from 'ts-time/Duration'
+import Duration, { HOUR_DURATION, MINUTE_DURATION, SECOND_DURATION } from 'ts-time/Duration'
 
 function isInt(value : number): boolean {
   return value % 1 === 0
@@ -7,6 +7,21 @@ function isInt(value : number): boolean {
 
 function removeFloat(value : number): number {
   return value - (value % 1)
+}
+
+export function formatDuration(duration: Duration): string {
+  const days = Math.floor(duration.ms / Duration.ofDays(1).ms);
+  const hours = Math.floor((duration.ms % Duration.ofDays(1).ms) / HOUR_DURATION.ms);
+  const minutes = Math.floor((duration.ms % HOUR_DURATION.ms) / MINUTE_DURATION.ms);
+  const seconds = Math.floor((duration.ms % MINUTE_DURATION.ms) / SECOND_DURATION.ms);
+
+  const parts : string[] = [];
+  parts.push(`${days}d`);
+  parts.push(`${hours}h`);
+  parts.push(`${minutes}m`);
+  parts.push(`${seconds}s`);
+
+  return parts.join(" ") || "0s";
 }
 
 export interface RecipeEntry {
