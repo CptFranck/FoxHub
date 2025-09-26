@@ -1,9 +1,13 @@
 <script setup lang="ts">
 import { formatDuration, Recipe } from '@/class/Recipe.ts'
+import { Privacy } from '@/class/PrivacyEnum.ts'
 
   defineProps<{
     recipe: Recipe
+    orderPrivacy: Privacy
   }>()
+
+
 
 </script>
 
@@ -34,7 +38,8 @@ import { formatDuration, Recipe } from '@/class/Recipe.ts'
             >
           </span>
     </td>
-    <td>/...</td>
+    <td v-if="orderPrivacy === Privacy.PERSONAL">{{ recipe.personalOutputLimit }}</td>
+    <td v-if="orderPrivacy === Privacy.PUBLIC">{{ Recipe.publicStockpileLimit }}</td>
     <td>{{ formatDuration(recipe.processTime)}}</td>
   </tr>
 </template>
