@@ -4,42 +4,34 @@ import { Recipe } from '@/class/Recipe.ts'
   import { ref } from 'vue'
   import Duration from 'ts-time/Duration'
   import RefineryRow from '@/components/Refinery/RefineryRow.vue'
+import { Privacy } from '@/class/PrivacyEnum.ts'
 
   defineOptions({
     name: 'RefineryComponent'
   });
 
-  // basicMaterial: {
-  //   inputs: { resource : salvage,  value: 0 },
-  //   outputs: [{ name: "Basic Material", type: "basicMaterial", value: 0 }],
-  //   // time: { h: 0, min: 0, sec: 0, ms: 48 },
-  //   personalOutputLimit: 12500,
-  //   publicStockpileLimit: 32000,
-  // },
-  // diesel: {
-  //   inputs: { salvage: 5 },
-  //   outputs: { gas: 1 },
-  //   time: { h: 0, min: 0, sec: 12, ms: 0 },
-  //   personalOutputLimit: 6000,
-  //   publicStockpileLimit: 32000,
-  // },
-  // };
-
-  const orderPrivacy = ref(false);
+  const orderPrivacy = ref(Privacy.PERSONAL);
 
   const refiningOption = ref<Recipe[]>([
     new Recipe([{resource : new Resource("Salvage", 0), ratio: 2 }],
               [{resource: new Resource("Basic Material", 0), ratio: 1 }],
-              Duration.ofMs(480)),
+              Duration.ofMs(480),
+              12500),
     new Recipe([{ resource: new Resource("Salvage", 0), ratio: 5 }],
               [{ resource: new Resource("Diesel", 0), ratio: 1 }],
-              Duration.ofSeconds(12))
+              Duration.ofSeconds(12),
+      6000)
   ]);
 
 </script>
 
 <template>
   <div>
+    <button @click="orderPrivacy === Privacy.PERSONAL ?
+     orderPrivacy = Privacy.PUBLIC : orderPrivacy = Privacy.PERSONAL"
+    >
+      {{ orderPrivacy }}
+    </button>
     <table>
       <thead>
       <tr>
@@ -51,7 +43,11 @@ import { Recipe } from '@/class/Recipe.ts'
       </tr>
       </thead>
       <tbody>
-        <RefineryRow v-for="(recipe, kr) in refiningOption" :key="kr" :recipe="recipe" />
+        <RefineryRow v-for="(recipe, kr) in refiningOption"
+                     :key="kr"
+                     :recipe="recipe"
+                     :orderPrivacy="orderPrivacy"
+        />
       </tbody>
     </table>
   </div>
