@@ -4,13 +4,13 @@ import { Recipe } from '@/class/Recipe.ts'
   import { ref } from 'vue'
   import Duration from 'ts-time/Duration'
   import RefineryRow from '@/components/Refinery/RefineryRow.vue'
-import { Privacy } from '@/class/PrivacyEnum.ts'
+import { usePrivacyStore } from '@/stores/privacy.ts'
 
   defineOptions({
     name: 'RefineryComponent'
   });
 
-  const orderPrivacy = ref(Privacy.PERSONAL);
+  const orderPrivacy = usePrivacyStore();
 
   const refiningOption = ref<Recipe[]>([
     new Recipe([{resource : new Resource("Salvage", 0), ratio: 2 }],
@@ -27,10 +27,8 @@ import { Privacy } from '@/class/PrivacyEnum.ts'
 
 <template>
   <div>
-    <button @click="orderPrivacy === Privacy.PERSONAL ?
-     orderPrivacy = Privacy.PUBLIC : orderPrivacy = Privacy.PERSONAL"
-    >
-      {{ orderPrivacy }}
+    <button @click="orderPrivacy.toggle()">
+      {{ orderPrivacy.privacy }}
     </button>
     <table>
       <thead>
@@ -46,7 +44,7 @@ import { Privacy } from '@/class/PrivacyEnum.ts'
         <RefineryRow v-for="(recipe, kr) in refiningOption"
                      :key="kr"
                      :recipe="recipe"
-                     :orderPrivacy="orderPrivacy"
+                     :orderPrivacy="orderPrivacy.privacy"
         />
       </tbody>
     </table>
