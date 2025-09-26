@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import RefineryComponent from '@/components/Refinery.vue'
+import RefineryComponent from '@/components/Refinery/Refinery.vue'
 </script>
 
 <template>

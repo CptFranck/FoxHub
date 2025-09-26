@@ -7,8 +7,6 @@ import { Privacy } from '@/class/PrivacyEnum.ts'
     orderPrivacy: Privacy
   }>()
 
-
-
 </script>
 
 <template>
