@@ -34,21 +34,21 @@ export class Recipe {
   outputs: RecipeEntry[];
   time : Duration;
   processTime : Duration;
-  // personalOutputLimit: number;
-  // static publicStockpileLimit: number = 32000;
+  personalOutputLimit: number;
+  public static publicStockpileLimit: number = 32000;
 
   constructor(
     inputs: RecipeEntry[],
     outputs: RecipeEntry[],
     time: Duration,
-    // personalOutputLimit: number
+    personalOutputLimit: number
   ) {
     this.inputs = inputs;
     this.outputs = outputs;
     this.time = time;
     this.processTime = Duration.of(0);
     this.updateOutputValue();
-    // this.personalOutputLimit = personalOutputLimit;
+    this.personalOutputLimit = personalOutputLimit;
   }
 
   updateOutputValue() {
